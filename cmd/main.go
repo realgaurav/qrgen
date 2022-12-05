@@ -1,45 +1,53 @@
 package main
 
 import (
-	"bytes"
+	"crypto/rand"
+	"flag"
 	"fmt"
 	"log"
 
-	gqrcode "github.com/skip2/go-qrcode"
 	"golang.org/x/crypto/ssh/terminal"
+
+	"github.com/realgaurav/qrgen/pkg/qr"
 )
 
 func main() {
-	var ssid string
-	const (
-		content = "WIFI:T:WPA;S:%s;P:%s;;"
-		size    = 256
+	var (
+		ssid     string
+		pw       bool
+		password []byte
+		err      error
 	)
 
-	fmt.Print("SSID: ")
-	fmt.Scanf("%s", &ssid)
-	fmt.Print("Password: ")
-	pw, err := terminal.ReadPassword(0)
-	if err != nil {
-		log.Fatalf("error reading password: %v", err)
+	//cli := flag.NewFlagSet(os.Args[0], ExitOnError)
+	flag.StringVar(&ssid, "SSID", "", "WiFi SSID")
+	flag.BoolVar(&pw, "Password", false, "Prompt for WiFi password")
+	flag.Parse()
+
+	if ssid == "" {
+		fmt.Print("SSID: ")
+		fmt.Scanf("%s", &ssid)
 	}
 
-	qrc, err := gqrcode.New(string(escape(pw)), gqrcode.High)
-	if err != nil {
-		log.Fatalf("error generating QRCode: %v", err)
-	}
-	err = qrc.WriteFile(size, ssid+".png")
-	if err != nil {
-		log.Fatalf("error creating QRCode file: %v", err)
+	if pw {
+		fmt.Print("Password: ")
+		password, err = terminal.ReadPassword(0)
+		if err != nil {
+			log.Fatalf("error reading password: %v", err)
+		}
+		fmt.Println()
+	} else {
+		password = make([]byte, 20)
+		_, err = rand.Read(password)
+		if err != nil {
+			log.Fatalf("error generating password: %v", err)
+		}
 	}
 
-	fmt.Println("Successfully generated QRCode image" + ssid + ".png")
-}
+	err = qr.Generate(ssid, password)
+	if err != nil {
+		log.Fatalf("error generating QR code: %v", err)
+	}
 
-func escape(pw []byte) (escaped []byte) {
-	escaped = bytes.ReplaceAll(pw, []byte("\\"), []byte("\\\\"))
-	escaped = bytes.ReplaceAll(escaped, []byte(";"), []byte("\\;"))
-	escaped = bytes.ReplaceAll(escaped, []byte(","), []byte("\\,"))
-	escaped = bytes.ReplaceAll(escaped, []byte("\""), []byte("\\\""))
-	return bytes.ReplaceAll(escaped, []byte(":"), []byte("\\:"))
+	fmt.Println("Successfully generated QRCode image " + ssid + ".png")
 }

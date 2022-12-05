@@ -9,3 +9,11 @@ bin: qrgen ## Generate binary.
 qrgen: cmd/main.go
 	CGO_ENABLED=0 go build -o $@ $?
 
+fmt: goimports ## Format.
+
+goimports:
+	goimports -local github.com/realgaurav/qrgen -w .
+
+test: ## Run UT.
+	go test -v ./cmd/...
+	go test -v ./pkg/...

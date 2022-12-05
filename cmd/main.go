@@ -19,9 +19,8 @@ func main() {
 		err      error
 	)
 
-	//cli := flag.NewFlagSet(os.Args[0], ExitOnError)
-	flag.StringVar(&ssid, "SSID", "", "WiFi SSID")
-	flag.BoolVar(&pw, "Password", false, "Prompt for WiFi password")
+	flag.StringVar(&ssid, "s", "", "WiFi SSID")
+	flag.BoolVar(&pw, "p", false, "Prompt for WiFi password")
 	flag.Parse()
 
 	if ssid == "" {

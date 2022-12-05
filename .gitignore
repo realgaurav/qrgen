@@ -1,2 +1,8 @@
 # binary file.
 qrgen
+
+## Mac et. al.
+.DS_Store
+
+## QR code output
+*.png

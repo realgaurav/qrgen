@@ -9,6 +9,9 @@ bin: qrgen ## Generate binary.
 qrgen: cmd/main.go
 	CGO_ENABLED=0 go build -o $@ $?
 
+clean:
+	rm -f qrgen
+
 fmt: goimports ## Format.
 
 goimports:
